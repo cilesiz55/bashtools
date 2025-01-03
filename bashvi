@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+#----------------------------------------------------------------------------------------
+# @(#)  Filename:               bashvi
+# @(#)  Uses / used by:         Backup Operations
+# @(#)  Author:                 Cilesiz, Ugur
+# @(#)  Responsible Person:     Cilesiz, Ugur
+# @(#)  User to run Script:     personal account
+# @(#)  Purpose:                create new bash script with skeleton
+# @(#)  Purpose:
+# @(#)  Purpose:
+# @(#)  LastModified:           03.01.2025
+#----------------------------------------------------------------------------------------
+#       Modification:           03.01.2025, Cilesiz, 1.0.0,  Initial version
+#----------------------------------------------------------------------------------------
+
+# -------------
+# Global variables
+# -------------
+VERSION=1.0.0
+DEBUG=0
+LOGIT=0
+TERM=xterm
+USER=$(logname)
+HOST_NAME="${HOSTNAME^^}"
+SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_NAME=${BASH_SOURCE[0]##*/}
+LOG_FILE="${SCRIPT_PATH}/${SCRIPT_NAME%.*}-V${VERSION}-${HOST_NAME}-$(date +%Y-%m-%d_%H%M%S).log"
+
+
+# -------------
+#  Functions
+# -------------
+usage() {
+    cat <<END
+    $SCRIPT_NAME <SCRIPTNAME>
+
+END
+    exit 1
+}
+
+
+function WARNING {
+    #---------------------------
+    # WARNING Message - blue -
+    #---------------------------
+    (( DEBUG == 1 )) && set -x
+    tput setf 1; echo -e "WARNING: $* $(tput sgr0)"
+    (( LOGIT == 1 )) && echo -e "WARNING: $*" >> "${LOG_FILE}"
+}
+
+
+function ERROR {
+    #---------------------------
+    # ERROR Message - red -
+    #---------------------------
+    (( DEBUG == 1 )) && set -x
+    tput setf 4; echo -e "ERROR  : $* $(tput sgr0)"
+    (( LOGIT == 1 )) && echo -e "ERROR  : $*" >> "${LOG_FILE}"
+}
+
+
+function INFO {
+    #---------------------------
+    # INFO Message - green -
+    #---------------------------
+    (( DEBUG == 1 )) && set -x
+    tput setf 2; echo -e "INFO   : $* $(tput sgr0)"
+    (( LOGIT == 1 )) && echo -e "INFO   : $*" >> "${LOG_FILE}"
+}
+
+# Main program
+(( DEBUG == 1 )) && set -x
+(( $# == 0 )) && usage
+
+BASH_SCRIPT=$1
+
+if [[ -s "$BASH_SCRIPT" ]] # file exist and ist not empty
+then
+    ERROR "Script file $BASH_SCRIPT allready exist and is not empty"
+    exit 1
+fi
+
+touch $BASH_SCRIPT && chmod +x $BASH_SCRIPT
+
+cat > $BASH_SCRIPT <<END
+# vim:syntax=sh filetype=sh
+#!/usr/bin/env bash
+#----------------------------------------------------------------------------------------
+# @(#)  Filename:               $BASH_SCRIPT
+# @(#)  Uses / used by:         Backup Operations
+# @(#)  Author:                 ${USER^^}
+# @(#)  Responsible Person:     ${USER^^}
+# @(#)  User to run Script:     personal account
+# @(#)  Purpose:                description of script
+# @(#)  Purpose:
+# @(#)  Purpose:
+# @(#)  LastModified:           $(date +"%A %Y-%m-%d")
+#----------------------------------------------------------------------------------------
+#       Modification:           $(date +"%A %Y-%m-%d"), Cilesiz, 1.0.0,  Initial version
+#----------------------------------------------------------------------------------------
+
+#---------------------------
+# Global variables
+#---------------------------
+VERSION=1.0.0
+DEBUG=0
+LOGIT=0
+TERM=xterm
+USER=\$(logname)
+HOST_NAME="\${HOSTNAME^^}"
+SCRIPT_PATH="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_NAME=\${BASH_SOURCE[0]##*/}
+LOG_FILE="\${SCRIPT_PATH}/\${SCRIPT_NAME%.*}-V\${VERSION}-\${HOST_NAME}-\$(date +%Y-%m-%d_%H%M%S).log"
+
+
+# -------------
+#  Functions
+# -------------
+usage() {
+    cat <<USAGE
+    \$SCRIPT_NAME <SCRIPT OPTIONS>
+
+USAGE
+    exit 1
+}
+
+
+function WARNING {
+    #---------------------------
+    # WARNING Message - blue -
+    #---------------------------
+    (( DEBUG == 1 )) && set -x
+    tput setf 1; echo -e "WARNING: \$* \$(tput sgr0)"
+    (( LOGIT == 1 )) && echo -e "WARNING: \$*" >> "\${LOG_FILE}"
+}
+
+
+function ERROR {
+    #---------------------------
+    # ERROR Message - red -
+    #---------------------------
+    (( DEBUG == 1 )) && set -x
+    tput setf 4; echo -e "ERROR  : \$* \$(tput sgr0)"
+    (( LOGIT == 1 )) && echo -e "ERROR  : \$*" >> "\${LOG_FILE}"
+}
+
+
+function INFO {
+    #---------------------------
+    # INFO Message - green -
+    #---------------------------
+    (( DEBUG == 1 )) && set -x
+    tput setf 2; echo -e "INFO   : \$* \$(tput sgr0)"
+    (( LOGIT == 1 )) && echo -e "INFO   : \$*" >> "\${LOG_FILE}"
+}
+
+# Main program
+(( DEBUG == 1 )) && set -x
+
+(( \$# == 0 )) && usage
+
+
+END
+
+if bash -c ": >/dev/tty" >/dev/null 2>/dev/null
+then
+    vim "+normal G$" +startinsert! "$BASH_SCRIPT" </dev/tty || vim "+normal G$" "$BASH_SCRIPT" </dev/tty
+else
+    vim "$BASH_SCRIPT" "+normal G$" +startinsert! || vim "+normal G$" "$BASH_SCRIPT"
+fi
+
+exit
